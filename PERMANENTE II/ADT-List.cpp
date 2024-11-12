@@ -1,74 +1,95 @@
 #include <iostream>
-#define MAXSIZE 10 
+using namespace std;
 
-int A[MAXSIZE];     
-int end = -1;       
+// Definición de la estructura del nodo de la lista enlazada
+struct nodo {
+    int valor;       // Valor del nodo
+    nodo* next;      // Puntero al siguiente nodo
 
-//Insertar un elemento al final del array
-void insert(int value) {
-    if (end < MAXSIZE - 1) {   // Verifica SI HAY ESPACIO en el array
-        A[++end] = value;      // Inserta en la siguente posicion de `end`
-    } else {
-        std::cout << "Error: El array está lleno." << std::endl;
-    }
+    // Constructor del nodo
+    nodo(int v, nodo* n = nullptr) : valor(v), next(n) {}
+};
+
+// Función para insertar un nodo al principio de la lista
+void insertAtBeginning(nodo*& head, int data) {
+    nodo* newNode = new nodo(data);
+    newNode->next = head;
+    head = newNode;
 }
 
-//Insertar un elemento
-void insert(int value, int position) {
-    if (end >= MAXSIZE - 1) {
-        std::cout << "Error: El array está lleno." << std::endl;
-        return;
+// Función para fusionar dos listas enlazadas de manera ordenada
+void mergeLists(nodo*& LEA, nodo*& LEB) {
+    nodo* mergedHead = nullptr;
+    nodo** lastPtrRef = &mergedHead;
+
+    // Fusiona las listas ordenadamente
+    while (LEA != nullptr && LEB != nullptr) {
+        if (LEA->valor < LEB->valor) {
+            *lastPtrRef = LEA;
+            LEA = LEA->next;
+        } else {
+            *lastPtrRef = LEB;
+            LEB = LEB->next;
+        }
+        lastPtrRef = &((*lastPtrRef)->next);
     }
-    if (position < 0 || position > end + 1) {
-        std::cout << "Error: Posición inválida." << std::endl;
-        return;
-    }
-    // Mueve los elementos a la derecha para abrir espacio en `position`
-    for (int i = end; i >= position; i--) {
-        A[i + 1] = A[i];
-    }
-    A[position] = value;  // Inserta el nuevo valor en la posición deseada
-    end++;                // Aumenta el tamaño del array
+
+    // Si queda algún nodo en LEA o LEB, se añade al final de la lista fusionada
+    *lastPtrRef = (LEA != nullptr) ? LEA : LEB;
+
+    // Apunta LEA a la lista fusionada y LEB a nullptr
+    LEA = mergedHead;
+    LEB = nullptr;
 }
 
-// Función para eliminar un elemento en una posición específica
-void remove(int position) {
-    if (position < 0 || position > end) {
-        std::cout << "Error: Posición inválida." << std::endl;
-        return;
+// Función para imprimir el contenido de la lista enlazada
+void print(nodo* head) {
+    while (head != nullptr) {
+        cout << head->valor << " -> ";
+        head = head->next;
     }
-    // Mueve los elementos a la izquierda para cubrir la posición eliminada
-    for (int i = position; i < end; i++) {
-        A[i] = A[i + 1];
-    }
-    end--;  // Disminuye el tamaño del array
-}
-
-// Función para mostrar el contenido del array
-void display() {
-    std::cout << "Array: ";
-    for (int i = 0; i <= end; i++) {
-        std::cout << A[i] << " ";
-    }
-    std::cout << std::endl;
+    cout << "NULL" << endl;
 }
 
 int main() {
-    // Insertamos 5 elementos: 2, 4, 6, 7, 9
-    insert(2);
-    insert(4);
-    insert(6);
-    insert(7);
-    insert(9);
-    display();
+    nodo* LEA = nullptr;
+    insertAtBeginning(LEA, 18); // 18
+    insertAtBeginning(LEA, 7);  // 7 -> 18
+    insertAtBeginning(LEA, 2);  // 2 -> 7 -> 18
+    insertAtBeginning(LEA, 1);  // 1 -> 2 -> 7 -> 18
 
-    // Intercambiamos elementos insertando 5 en la posición 2
-    insert(5, 2);
-    display();
+    nodo* LEB = nullptr;
+    insertAtBeginning(LEB, 40); // 40
+    insertAtBeginning(LEB, 30); // 30 -> 40
+    insertAtBeginning(LEB, 10); // 10 -> 30 -> 40
+    insertAtBeginning(LEB, 9);  // 9 -> 10 -> 30 -> 40
+    insertAtBeginning(LEB, 8);  // 8 -> 9 -> 10 -> 30 -> 40
+    insertAtBeginning(LEB, 1);  // 1 -> 8 -> 9 -> 10 -> 30 -> 40
 
-    // Eliminamos el elemento en la posición 0
-    remove(0);
-    display();
+    // Imprimir listas antes de la fusión
+    cout << "Lista LEA original (ordenada): ";
+    print(LEA);
+
+    cout << "Lista LEB original (ordenada): ";
+    print(LEB);
+
+    // Fusionar LEA y LEB
+    mergeLists(LEA, LEB);
+
+    // Imprimir la lista fusionada
+    cout << "Lista LEA fusionada y ordenada: ";
+    print(LEA); // LEA contendrá la lista fusionada
+
+    // LEB debe estar vacío
+    cout << "Lista LEB (debe ser NULL): ";
+    print(LEB);
+
+    // Liberar memoria de la lista fusionada
+    while (LEA != nullptr) {
+        nodo* temp = LEA;
+        LEA = LEA->next;
+        delete temp;
+    }
 
     return 0;
 }
